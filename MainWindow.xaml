@@ -1,0 +1,1424 @@
+﻿<Window x:Class="SciChartExport.MainWindow" 
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        Title="FEE - HAUI_ROBOT_ANALYZER_V3.1       28.01.2024             IP: 192.168.1.10" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:ext="http://schemas.abtsoftware.co.uk/scichart/exampleExternals"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:s="http://schemas.abtsoftware.co.uk/scichart"             
+        Loaded="PolarChartExampleView_OnLoaded"
+        
+        Width="1920" 
+        Height="1066" Closed="Window_Closed" Closing="Window_Closing" WindowStartupLocation="CenterScreen" MinHeight="1066" MaxHeight="1066" MinWidth="1920" MaxWidth="1920" FontWeight="Bold" WindowState="Maximized" ResizeMode="NoResize" Icon="/robot.ico">
+
+    <Window.Resources>
+
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/SciChart.Examples.ExternalDependencies;component/Resources/Styles/ToolbarButtonsCommon.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <ext:BoolToValueConverter x:Key="BoolToVisibilityConverter" FalseValue="Collapsed" TrueValue="Visible" />
+            <s:GradientStopsToLinearGradientBrushConverter x:Key="ColorsToLineatGradientBrushConverter"/>
+
+            <Style x:Key="AxisStyle" TargetType="s:AxisBase">
+                <Setter Property="DrawMajorBands" Value="False" />
+                <Setter Property="IsPrimaryAxis" Value="False" />
+                <Setter Property="AxisBandsFill" Value="Transparent" />
+                <Setter Property="DrawMajorGridLines" Value="false" />
+                <Setter Property="DrawMinorGridLines" Value="false" />
+
+                <Setter Property="MajorTickLineStyle">
+                    <Setter.Value>
+                        <Style TargetType="Line">
+                            <Setter Property="Stroke" Value="Transparent" />
+                        </Style>
+                    </Setter.Value>
+                </Setter>
+
+                <Setter Property="MinorTickLineStyle">
+                    <Setter.Value>
+                        <Style TargetType="Line">
+                            <Setter Property="Stroke" Value="Transparent" />
+                        </Style>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="sliceStyle" TargetType="s:VerticalLineAnnotation">
+                <Setter Property="ShowLabel" Value="True" />
+                <Setter Property="Stroke" Value="Green" />
+                <Setter Property="IsEditable" Value="True" />
+                <Setter Property="LabelPlacement" Value="Top" />
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Stroke" Value="Red" />
+                        <Setter Property="StrokeThickness" Value="1" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="sliceStyle2" TargetType="s:VerticalLineAnnotation">
+                <Setter Property="ShowLabel" Value="False" />
+                <Setter Property="Stroke" Value="Orange" />
+                <Setter Property="IsEditable" Value="False" />
+                <Setter Property="LabelPlacement" Value="Top" />
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="False">
+                        <Setter Property="Stroke" Value="Orange" />
+                        <Setter Property="StrokeThickness" Value="1" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="sliceStyle3" TargetType="s:VerticalLineAnnotation">
+                <Setter Property="ShowLabel" Value="True" />
+                <Setter Property="Stroke" Value="Black" />
+                <Setter Property="IsEditable" Value="True" />
+                <Setter Property="LabelPlacement" Value="TopLeft" />
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="False">
+                        <Setter Property="Stroke" Value="Black" />
+                        <Setter Property="StrokeThickness" Value="1.5"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="sliceStyle4" TargetType="s:VerticalLineAnnotation">
+                <Setter Property="ShowLabel" Value="True" />
+                <Setter Property="Stroke" Value="Orange" />
+                <Setter Property="IsEditable" Value="True" />
+                <Setter Property="LabelPlacement" Value="TopLeft" />
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="False">
+                        <Setter Property="Stroke" Value="Orange" />
+                        <Setter Property="StrokeThickness" Value="1" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="sliceStyle5" TargetType="s:VerticalLineAnnotation">
+                <Setter Property="ShowLabel" Value="False" />
+                <Setter Property="Stroke" Value="Red" />
+                <Setter Property="IsEditable" Value="True" />
+                <Setter Property="LabelPlacement" Value="TopLeft" />
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="False">
+                        <Setter Property="Stroke" Value="Red" />
+                        <Setter Property="StrokeThickness" Value="1" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="TooltipStyle1" TargetType="s:TooltipControl">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="s:TooltipControl">
+                            <Border Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="1"
+                                Opacity="0.1"
+                                Padding="5">
+
+                                <ContentPresenter Content="{TemplateBinding DataContext}"
+                                 ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid MinWidth="1920" MaxWidth="1920" MinHeight="1055" MaxHeight="1055" Margin="0,0,0,26" Height="1055" Width="1920">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="370" />
+            <ColumnDefinition Width="1550"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid x:Name="Lidar_Viewx" HorizontalAlignment="Left" Height="1044"  VerticalAlignment="Top" Width="1920"  Background="{DynamicResource {x:Static SystemColors.GradientInactiveCaptionBrushKey}}" Visibility="Hidden" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <s:SciChartSurface x:Name="Sensor_Scope2"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="10,66,10,556">
+                <s:SciChartSurface.RenderableSeries>
+
+                    <!--<s:FastLineRenderableSeries x:Name="Sensor_Data_R1" Stroke="Red" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Data_R2" Stroke="Green" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Data_R3" Stroke="Blue" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Data_R4" Stroke="Orange" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />-->
+
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Data_R1">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Red" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Data_R2">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Green" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Data_R3">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Blue" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Data_R4">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Orange" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+                        <s:VerticalSliceModifier x:Name="S8_Line1">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="S8_Line1i" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip="" MouseMove="S8_Line1i_MouseMove" />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+                        LegendPlacement="Top"
+                        Orientation="Horizontal"
+                        ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+                    x:Name="X_SCope1"
+                    FlipCoordinates="False"
+                    GrowBy="0.1, 0.1"
+                    ScientificNotation="None"
+                    TextFormatting="#.############"
+                    BorderThickness="0,2,0,0" 
+                    TitleFontSize="20"
+                    VisibleRange="0,100" 
+                    AutoRange="Once"    
+                                   />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+                    x:Name="Y_SCope1"
+                    GrowBy="0.1, 0.1" 
+                    TitleFontSize="20"
+                    VisibleRange="-10,10" 
+                    AutoRange="Once" AxisAlignment="Left" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+
+            <s:SciChartSurface x:Name="Sensor_Scope3"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="10,536,10,46">
+                <s:SciChartSurface.RenderableSeries>
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Data_A1">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Red" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Data_A2">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Blue" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Data_A3">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Green" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Data_A4">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Orange" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Data_A5">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Violet" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+                        <s:VerticalSliceModifier x:Name="S9_Line1">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="S9_Line1i" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip="" MouseMove="S9_Line1i_MouseMove" />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+                        LegendPlacement="Top"
+                        Orientation="Horizontal"
+                        ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+                        x:Name="X_SCope2"
+                        FlipCoordinates="False"
+                        GrowBy="0.1, 0.1"
+                        ScientificNotation="None"
+                        TextFormatting="#.############"
+                        BorderThickness="0,2,0,0" 
+                        TitleFontSize="20"
+                        VisibleRange="0,100" 
+                        AutoRange="Once"    
+                                   />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+                        x:Name="Y_SCope2"
+                        GrowBy="0.1, 0.1" 
+                        TitleFontSize="20"
+                        VisibleRange="-10,10" 
+                        AutoRange="Once" AxisAlignment="Left" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+            <TextBox x:Name="RAM_D2"  HorizontalAlignment="Left" Height="22" Margin="1509,7,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="72" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RAM_D3"  HorizontalAlignment="Left" Height="22" Margin="1673,7,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="74" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RAM_D4"  HorizontalAlignment="Left" Height="22" Margin="1836,6,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="74" FontWeight="Bold" Foreground="Orange"/>
+            <Label Content="L3G4200D" HorizontalAlignment="Left" Margin="1272,4,0,0" VerticalAlignment="Top" Width="78" FontWeight="Bold" FontSize="14" FontStyle="Italic"/>
+            <Label Content="MPU9250" HorizontalAlignment="Left" Margin="1431,3,0,0" VerticalAlignment="Top" Width="78" FontWeight="Bold" FontSize="14" FontStyle="Italic"/>
+            <Label Content="BMI160" HorizontalAlignment="Left" Margin="1594,3,0,0" VerticalAlignment="Top" Width="78" FontWeight="Bold" FontSize="14" FontStyle="Italic"/>
+            <TextBox x:Name="Result_D2" HorizontalAlignment="Left" Height="22" Margin="1514,503,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="72" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="Result_D3" HorizontalAlignment="Left" Height="22" Margin="1677,503,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="74" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="Result_D4" HorizontalAlignment="Left" Height="22" Margin="1836,502,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="74" FontWeight="Bold" Foreground="Orange"/>
+            <Label Content="L3G4200D" HorizontalAlignment="Left" Margin="1272,499,0,0" VerticalAlignment="Top" Width="78" FontWeight="Bold" FontSize="14" FontStyle="Italic"/>
+            <Label Content="MPU9250" HorizontalAlignment="Left" Margin="1435,500,0,0" VerticalAlignment="Top" Width="78" FontWeight="Bold" FontSize="14" FontStyle="Italic"/>
+            <Label Content="BMI160" HorizontalAlignment="Left" Margin="1594,500,0,0" VerticalAlignment="Top" Width="78" FontWeight="Bold" FontSize="14" FontStyle="Italic"/>
+            <Label Content="IMU RAW (192.168.1.13)" HorizontalAlignment="Left" Margin="22,7,0,0" VerticalAlignment="Top" Width="172" FontWeight="Bold" FontSize="14" Foreground="Red" RenderTransformOrigin="-1.144,0.246"/>
+            <ComboBox Name="REG_SELLECT"  HorizontalAlignment="Left" Margin="1208,7,0,0" VerticalAlignment="Top" Width="107" Visibility="Hidden"/>
+            <Label x:Name="switch_mode2" Content="Robot Analyzer" HorizontalAlignment="Left" VerticalAlignment="Top" Width="141" FontWeight="Bold" FontSize="16" RenderTransformOrigin="-1.144,0.246" Margin="253,5,0,0" MouseDoubleClick="switch_mode2_MouseDoubleClick" Background="{DynamicResource ToggleBrush}" Foreground="#FF000200" Height="32" MouseLeftButtonDown="switch_mode2_MouseLeftButtonDown"/>
+            <Label Content="IMU RESULT DATA:" HorizontalAlignment="Left" Margin="1112,497,0,0" VerticalAlignment="Top" Width="150" FontWeight="Bold" FontSize="14" Foreground="Red" RenderTransformOrigin="-1.144,0.246"/>
+            <Ellipse x:Name="Connect3" HorizontalAlignment="Left" Height="24" Margin="199,10,0,0" VerticalAlignment="Top" Width="24" Fill="Red"/>
+            <TextBox x:Name="RAM_D1"  HorizontalAlignment="Left" Height="22" Margin="1350,7,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="72" FontWeight="Bold" Foreground="Red"/>
+            <Label Content="MPU6050" HorizontalAlignment="Left" Margin="1756,3,0,0" VerticalAlignment="Top" Width="78" FontWeight="Bold" FontSize="14" FontStyle="Italic"/>
+            <TextBox x:Name="Result_D1"  HorizontalAlignment="Left" Height="22" Margin="1354,504,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="72" FontWeight="Bold" Foreground="Red"/>
+            <Label Content="MPU6050" HorizontalAlignment="Left" Margin="1753,499,0,0" VerticalAlignment="Top" Width="78" FontWeight="Bold" FontSize="14" FontStyle="Italic"/>
+            <Label x:Name="Clear2" Content="Clear_Data" HorizontalAlignment="Left" Margin="10,497,0,0" VerticalAlignment="Top" Width="99" FontWeight="Bold" FontSize="14" Foreground="Black" RenderTransformOrigin="-1.144,0.246" MouseDoubleClick="Clear2_MouseDoubleClick" Background="{DynamicResource ToggleBrush}" MouseLeftButtonDown="Clear2_MouseLeftButtonDown"/>
+            <Label x:Name="ClearX1" Content="RESET IMU" HorizontalAlignment="Left" Margin="124,497,0,0" VerticalAlignment="Top" Width="99" FontWeight="Bold" FontSize="14" Foreground="Black" RenderTransformOrigin="-1.144,0.246" MouseDoubleClick="ClearX1_MouseDoubleClick" Background="{DynamicResource ToggleBrush}" MouseLeftButtonDown="ClearX1_MouseLeftButtonDown"/>
+            <Label x:Name="ClearX2" Content="CALIB IMU" HorizontalAlignment="Left" Margin="243,497,0,0" VerticalAlignment="Top" Width="99" FontWeight="Bold" FontSize="14" Foreground="Black" RenderTransformOrigin="-1.144,0.246" MouseDoubleClick="ClearX2_MouseDoubleClick" Background="{DynamicResource ToggleBrush}" MouseLeftButtonDown="ClearX2_MouseLeftButtonDown"/>
+            <TextBox x:Name="RAM_OF2"  HorizontalAlignment="Left" Height="22" Margin="1510,38,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="72" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RAM_OF3"  HorizontalAlignment="Left" Height="22" Margin="1673,38,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="74" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RAM_OF4"  HorizontalAlignment="Left" Height="23" Margin="1836,37,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="74" FontWeight="Bold" Foreground="Orange"/>
+            <Label Content="L3G4200D offset" HorizontalAlignment="Left" Margin="1260,38,0,0" VerticalAlignment="Top" Width="90" FontWeight="Bold" FontSize="10" FontStyle="Italic"/>
+            <Label Content="MPU9250 offset" HorizontalAlignment="Left" Margin="1423,37,0,0" VerticalAlignment="Top" Width="86" FontWeight="Bold" FontSize="10" FontStyle="Italic"/>
+            <Label Content="BMI160 offset" HorizontalAlignment="Left" Margin="1590,37,0,0" VerticalAlignment="Top" Width="78" FontWeight="Bold" FontSize="10" FontStyle="Italic"/>
+            <TextBox x:Name="RAM_OF1"  HorizontalAlignment="Left" Height="22" Margin="1350,38,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="72" FontWeight="Bold" Foreground="Red"/>
+            <Label Content="MPU6050 offset" HorizontalAlignment="Left" Margin="1749,38,0,0" VerticalAlignment="Top" Width="87" FontWeight="Bold" FontSize="10" FontStyle="Italic"/>
+            <CheckBox x:Name="SCREEN_VIEWS22" Content="COMPASS RUN" HorizontalAlignment="Left" Margin="457,12,0,0" VerticalAlignment="Top" Checked="SCREEN_VIEWS22_Checked" Unchecked="SCREEN_VIEWS22_Unchecked" Width="128" IsChecked="True"/>
+            <CheckBox x:Name="SCREEN_VIEWS23" Content="DONG BO ROBOT ANALYZER" HorizontalAlignment="Left" Margin="619,12,0,0" VerticalAlignment="Top" Checked="SCREEN_VIEWS23_Checked" Unchecked="SCREEN_VIEWS23_Unchecked" Width="194" IsChecked="False" Foreground="Violet"/>
+            <TextBox x:Name="Result_D5" HorizontalAlignment="Left" Height="22" Margin="1009,501,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="74" FontWeight="Bold" Foreground="Violet"/>
+            <Label Content="MPU6050 Robot" HorizontalAlignment="Left" Margin="876,498,0,0" VerticalAlignment="Top" Width="128" FontWeight="Bold" FontSize="14" FontStyle="Italic"/>
+
+        </Grid>
+        <Grid x:Name="ROBOT_VIEW" HorizontalAlignment="Left" Height="1020" VerticalAlignment="Top" Width="1900" Background="{DynamicResource {x:Static SystemColors.GradientInactiveCaptionBrushKey}}" MinHeight="1020" MaxHeight="1020" MinWidth="1920" MaxWidth="1920" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Ellipse x:Name="IP_D0" HorizontalAlignment="Left" Height="30" Margin="1610,908,0,0" VerticalAlignment="Top" Width="30" Fill="Red"/>
+            <Ellipse x:Name="IP_D1" HorizontalAlignment="Left" Height="30" Margin="1645,908,0,0" VerticalAlignment="Top" Width="30" Fill="Red"/>
+            <Ellipse x:Name="IP_D2" HorizontalAlignment="Left" Height="30" Margin="1680,908,0,0" VerticalAlignment="Top" Width="30" Fill="Red" RenderTransformOrigin="2.378,0.568"/>
+            <Ellipse x:Name="IP_D3" HorizontalAlignment="Left" Height="30" Margin="1715,908,0,0" VerticalAlignment="Top" Width="30" Fill="Red" RenderTransformOrigin="2.378,0.568"/>
+            <Ellipse x:Name="IP_D4" HorizontalAlignment="Left" Height="30" Margin="1752,908,0,0" VerticalAlignment="Top" Width="30" Fill="Red"/>
+            <Ellipse x:Name="IP_D5" HorizontalAlignment="Left" Height="30" Margin="1787,907,0,0" VerticalAlignment="Top" Width="30" Fill="Red"/>
+            <Ellipse x:Name="IP_D6" HorizontalAlignment="Left" Height="30" Margin="1822,908,0,0" VerticalAlignment="Top" Width="30" Fill="Red" RenderTransformOrigin="2.378,0.568"/>
+            <Ellipse x:Name="IP_D7" HorizontalAlignment="Left" Height="30" Margin="1857,908,0,0" VerticalAlignment="Top" Width="30" Fill="Red" RenderTransformOrigin="2.378,0.568"/>
+            <Ellipse x:Name="IP_D0s" HorizontalAlignment="Left" Height="30" Margin="1609,964,0,0" VerticalAlignment="Top" Width="30" Fill="Red"/>
+            <Ellipse x:Name="IP_D1s" HorizontalAlignment="Left" Height="30" Margin="1644,964,0,0" VerticalAlignment="Top" Width="30" Fill="Red"/>
+            <Ellipse x:Name="IP_D2s" HorizontalAlignment="Left" Height="30" Margin="1679,964,0,0" VerticalAlignment="Top" Width="30" Fill="Red" RenderTransformOrigin="2.378,0.568"/>
+            <Ellipse x:Name="IP_D3s" HorizontalAlignment="Left" Height="30" Margin="1714,964,0,0" VerticalAlignment="Top" Width="30" Fill="Red" RenderTransformOrigin="2.378,0.568"/>
+            <Ellipse x:Name="IP_D4s" HorizontalAlignment="Left" Height="30" Margin="1751,964,0,0" VerticalAlignment="Top" Width="30" Fill="Red"/>
+            <Ellipse x:Name="IP_D5s" HorizontalAlignment="Left" Height="30" Margin="1786,963,0,0" VerticalAlignment="Top" Width="30" Fill="Red"/>
+            <Ellipse x:Name="IP_D6s" HorizontalAlignment="Left" Height="30" Margin="1821,964,0,0" VerticalAlignment="Top" Width="30" Fill="Red" RenderTransformOrigin="2.378,0.568"/>
+            <Ellipse x:Name="IP_D7s" HorizontalAlignment="Left" Height="30" Margin="1856,964,0,0" VerticalAlignment="Top" Width="30" Fill="Red" RenderTransformOrigin="2.378,0.568"/>
+            <Label Content="D9" HorizontalAlignment="Left" Margin="1609,937,0,0" VerticalAlignment="Top" Width="35" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D10" HorizontalAlignment="Left" Margin="1642,937,0,0" VerticalAlignment="Top" Width="34" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D11" HorizontalAlignment="Left" Margin="1677,937,0,0" VerticalAlignment="Top" Width="34" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D12" HorizontalAlignment="Left" Margin="1713,937,0,0" VerticalAlignment="Top" Width="34" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D13" HorizontalAlignment="Left" Margin="1750,937,0,0" VerticalAlignment="Top" Width="34" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D14" HorizontalAlignment="Left" Margin="1785,937,0,0" VerticalAlignment="Top" Width="34" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D15" HorizontalAlignment="Left" Margin="1820,937,0,0" VerticalAlignment="Top" Width="34" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D16" HorizontalAlignment="Left" Margin="1854,937,0,0" VerticalAlignment="Top" Width="34" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <s:SciChartSurface x:Name="Sensor_Scopex1"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="31,662,335,164">
+                <s:SciChartSurface.RenderableSeries>
+
+                    <!--<s:FastLineRenderableSeries x:Name="Sensor_adcData1" Stroke="Red" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_adcData2" Stroke="Green" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_adcData3" Stroke="Blue" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />-->
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_adcData1">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Red" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_adcData2">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Blue" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_adcData3">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Green" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Encoder">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Violet" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+                        <s:VerticalSliceModifier x:Name="S2_Line1" ShowAxisLabels="False" ShowTooltipOn="Never">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="S2_Line1i" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip="" MouseMove="S2_Line1i_MouseMove" />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+                        LegendPlacement="Top"
+                        Orientation="Horizontal"
+                        ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+                        x:Name="X_SCope3"
+                        FlipCoordinates="False"
+                        GrowBy="0.1, 0.1"
+                        ScientificNotation="None"
+                        TextFormatting="#.############"
+                        BorderThickness="0,2,0,0" 
+                        TitleFontSize="20"
+                        VisibleRange="0,150" 
+                        AutoRange="Once" MaxAutoTicks="20"    
+                                   />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+                        x:Name="Y_SCope3"
+                        GrowBy="0.1, 0.1" 
+                        TitleFontSize="20"
+                        VisibleRange="0,66000" 
+                        AutoRange="Once" AxisAlignment="Left" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+            <Label  x:Name="Viewx4"  Content="PES_DATA[3]" HorizontalAlignment="Left" Margin="1601,719,0,0" VerticalAlignment="Top" Width="143" FontSize="20" FontWeight="Bold" Foreground="Green" Visibility="Hidden"/>
+            <TextBox x:Name="RB_tb15"  HorizontalAlignment="Left" Height="37" Margin="1761,719,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Visibility="Hidden"/>
+            <Label  x:Name="Viewx5"  Content="PES_DATA[4]" HorizontalAlignment="Left" Margin="1601,768,0,0" VerticalAlignment="Top" Width="143" FontSize="20" FontWeight="Bold" Foreground="Green" Visibility="Hidden"/>
+            <TextBox x:Name="RB_tb16"  HorizontalAlignment="Left" Height="37" Margin="1761,768,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Visibility="Hidden"/>
+            <TextBox x:Name="RB_tb17"  HorizontalAlignment="Left" Height="38" Margin="1762,565,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red"/>
+            <TextBox x:Name="RB_tb18"  HorizontalAlignment="Left" Height="37" Margin="1762,614,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="#FF0300FF"/>
+            <Label  x:Name="Viewx6"  Content="PES_DATA[5]" HorizontalAlignment="Left" Margin="1601,818,0,0" VerticalAlignment="Top" Width="143" FontSize="20" FontWeight="Bold" Foreground="Green" Visibility="Hidden"/>
+            <TextBox x:Name="RB_tb29" HorizontalAlignment="Left" Height="37" Margin="1761,818,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Visibility="Hidden"/>
+            <TextBox x:Name="RB_tb12"  HorizontalAlignment="Left" Height="37" Margin="1762,414,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tb13"  HorizontalAlignment="Left" Height="37" Margin="1762,463,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red"/>
+            <TextBox x:Name="RB_tb14"  HorizontalAlignment="Left" Height="37" Margin="1762,513,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Green"/>
+            <Label x:Name="BT_CLEAR" Content="RESET" HorizontalAlignment="Left" Margin="1601,14,0,0" VerticalAlignment="Top" Width="143" FontSize="20" FontWeight="Bold" MouseDoubleClick="BT_CLEAR_MouseDoubleClick"/>
+            <TextBox x:Name="RB_tb1" HorizontalAlignment="Left" Height="37" Margin="1761,14,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red"/>
+            <TextBox x:Name="RB_tb2"  HorizontalAlignment="Left" Height="37" Margin="1761,63,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Violet"/>
+            <TextBox x:Name="RB_tb3"  HorizontalAlignment="Left" Height="37" Margin="1761,113,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+            <Label Content="DC1 DUTY" HorizontalAlignment="Left" Margin="1601,169,0,0" VerticalAlignment="Top" Width="143" FontSize="16" FontWeight="Bold" FontStyle="Italic" Foreground="Red"/>
+            <TextBox x:Name="RB_tb4"  HorizontalAlignment="Left" Height="37" Margin="1761,164,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red"/>
+            <Label Content="Delay time (ms)" HorizontalAlignment="Left" Margin="1602,371,0,0" VerticalAlignment="Top" Width="142" FontSize="16" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <TextBox x:Name="RB_tb5"  HorizontalAlignment="Left" Height="36" Margin="1762,366,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold"/>
+            <Label Content="DC2 DUTY" HorizontalAlignment="Left" Margin="1601,217,0,0" VerticalAlignment="Top" Width="143" FontSize="16" FontWeight="Bold" FontStyle="Italic" Foreground="Green"/>
+            <TextBox x:Name="RB_tb6"  HorizontalAlignment="Left" Height="37" Margin="1761,214,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tb7"  HorizontalAlignment="Left" Height="36" Margin="1761,742,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold"/>
+            <Label Content="DC3 DUTY" HorizontalAlignment="Left" Margin="1601,269,0,0" VerticalAlignment="Top" Width="143" FontSize="16" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <TextBox x:Name="RB_tb8"  HorizontalAlignment="Left" Height="37" Margin="1761,266,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RB_tb9"  HorizontalAlignment="Left" Height="36" Margin="1761,783,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold"/>
+            <Label Content="DC4 DUTY" HorizontalAlignment="Left" Margin="1598,318,0,0" VerticalAlignment="Top" Width="142" FontSize="16" FontWeight="Bold" FontStyle="Italic" Foreground="Orange"/>
+            <TextBox x:Name="RB_tb10"  HorizontalAlignment="Left" Height="37" Margin="1761,315,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Orange"/>
+            <TextBox x:Name="RB_tb11"  HorizontalAlignment="Left" Height="36" Margin="1761,829,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold"/>
+            <Label Content="DATA ROBOT (192.168.1.12)" HorizontalAlignment="Left" Margin="10,9,0,0" VerticalAlignment="Top" Width="332" FontSize="24" FontWeight="Bold" Foreground="Red"/>
+            <Label x:Name="Start_View" Content="IMU ANALYSE" HorizontalAlignment="Left" Margin="356,18,0,0" VerticalAlignment="Top" Width="125" FontSize="16" FontWeight="Bold" Foreground="Black" MouseDoubleClick="Start_View_MouseDoubleClick" Background="{DynamicResource ToggleBrush}" MouseLeftButtonDown="Start_View_MouseLeftButtonDown"/>
+            <CheckBox x:Name="SCREEN_VIEWS" Content="SCALE [0; 20000]" HorizontalAlignment="Left" Margin="691,25,0,0" VerticalAlignment="Top" Checked="SCREEN_VIEWS_Checked" Unchecked="SCREEN_VIEWS_Unchecked" Visibility="Hidden"/>
+            <s:SciChartSurface x:Name="Sensor_ScopeX2"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="30,63,335,726">
+                <s:SciChartSurface.RenderableSeries>
+
+                    <!--<s:FastLineRenderableSeries x:Name="Sensor_Duty1" Stroke="Red" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Duty2" Stroke="Green" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Duty3" Stroke="Blue" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Duty4" Stroke="Orange" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />-->
+
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Duty1">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Red" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Duty2">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Blue" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Duty3">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Green" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_Duty4">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Orange" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+
+
+                        <s:VerticalSliceModifier x:Name="S1_Line1" ShowAxisLabels="False" ShowTooltipOn="Never">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="S1_Line1i" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip="" MouseMove="S1_Line1i_MouseMove" />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+                        LegendPlacement="Top"
+                        Orientation="Horizontal"
+                        ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+                        x:Name="X_SCope4"
+                        FlipCoordinates="False"
+                        GrowBy="0.1, 0.1"
+                        ScientificNotation="None"
+                        TextFormatting="#.############"
+                        BorderThickness="0,2,0,0" 
+                        TitleFontSize="20"
+                        VisibleRange="0,150" 
+                        AutoRange="Once" MaxAutoTicks="20"    
+                                   />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+                        x:Name="Y_SCope4"
+                        GrowBy="0.1, 0.1" 
+                        TitleFontSize="20"
+                        VisibleRange="-10,260" 
+                        AutoRange="Once" AxisAlignment="Left" MaxAutoTicks="24" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+            <Label Content="MOTOR DUTY" HorizontalAlignment="Left" Margin="-27,129,0,0" VerticalAlignment="Top" Width="116" FontWeight="Bold" Foreground="Red" FontSize="14" RenderTransformOrigin="0.319,0.683">
+                <Label.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Label.RenderTransform>
+            </Label>
+            <Label Content="ADC DATA" HorizontalAlignment="Left" Margin="-37,743,0,0" VerticalAlignment="Top" Width="105" FontWeight="Bold" Foreground="Red" FontSize="14" RenderTransformOrigin="0.5,0.5">
+                <Label.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Label.RenderTransform>
+            </Label>
+            <Ellipse x:Name="ESP_Connect2" HorizontalAlignment="Left" Height="48" Margin="617,7,0,0" VerticalAlignment="Top" Width="52" Fill="Red" Visibility="Hidden"/>
+            <TextBox x:Name="RB_tb20"  HorizontalAlignment="Left" Height="37" Margin="1762,660,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Green"/>
+            <s:SciChartSurface x:Name="sciChart3"
+                Margin="7,66,1379,20" RenderTransformOrigin="0.5,0.5" OverridesDefaultStyle="True" Visibility="Hidden" >
+                <s:SciChartSurface.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleY="1.006" ScaleX="0.994"/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="0"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </s:SciChartSurface.RenderTransform>
+
+                <!--<s:SciChartSurface.Annotations >
+                    <s:HorizontalLineAnnotation 
+                        x:Name="Scan2XX1"
+                        HorizontalAlignment="Stretch"
+                        FontSize="13"
+                        FontWeight="Bold"
+                        Foreground="White"
+                        IsEditable="False"
+                        LabelPlacement="Axis"
+                        LabelTextFormatting="0.00"
+                        ShowLabel="True"
+                        Stroke="Red"
+                        StrokeThickness="1"
+                        Y1="200" />
+                </s:SciChartSurface.Annotations>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+                        <s:VerticalSliceModifier x:Name="RY3" ShowAxisLabels="False" ShowTooltipOn="Never" Content="123">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="LR3" Style="{StaticResource sliceStyle}" X1="200" />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+                        <s:LegendModifier Margin="0,0,0,5"
+                            LegendPlacement="Top"
+                            Orientation="Horizontal"
+                            ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>-->
+
+                <s:SciChartSurface.RenderableSeries>
+                    <s:FastUniformHeatmapRenderableSeries x:Name="HeatmapRenderableSeries1" UseLinearTextureFiltering="True">
+                        <s:FastUniformHeatmapRenderableSeries.ColorMap>
+                            <s:HeatmapColorPalette x:Name="Palette_edit1" Minimum="-1" Maximum="1">
+                                <GradientStop Offset="0" Color="Transparent" />
+                                <GradientStop Offset="0.0001" Color="DarkBlue" />
+                                <GradientStop Offset="0.2" Color="CornflowerBlue" />
+                                <GradientStop Offset="0.30" Color="BlueViolet" />
+                                <GradientStop Offset="0.40" Color="CadetBlue" />
+                                <GradientStop Offset="0.41" Color="Aquamarine" />
+                                <GradientStop Offset="0.42" Color="LemonChiffon" />
+                                <GradientStop Offset="0.43" Color="Chartreuse" />
+                                <GradientStop Offset="0.44" Color="LightGoldenrodYellow" />
+                                <GradientStop Offset="0.45" Color="Chocolate" />
+                                <GradientStop Offset="0.46" Color="Lavender" />
+                                <GradientStop Offset="0.465" Color="CornflowerBlue" />
+                                <GradientStop Offset="0.47" Color="LawnGreen" />
+                                <GradientStop Offset="0.475" Color="DarkCyan" />
+                                <GradientStop Offset="0.48" Color="DarkSlateGray" />
+                                <GradientStop Offset="0.49" Color="DarkOliveGreen" />
+                                <!--<GradientStop Offset="0.496" Color="Bisque" />-->
+                                <GradientStop Offset="0.493" Color="LimeGreen" />
+                                <!--<GradientStop Offset="0.492" Color="Gainsboro" />-->
+                                <GradientStop Offset="0.497" Color="Bisque" />
+                                <!--<GradientStop Offset="0.497" Color="Firebrick" />-->
+                                <GradientStop Offset="0.50" Color="Transparent" />
+                                <!--<GradientStop Offset="0.504" Color="Bisque" />-->
+                                <GradientStop Offset="0.503" Color="Bisque" />
+                                <!--<GradientStop Offset="0.504" Color="Bisque" />-->
+                                <GradientStop Offset="0.507" Color="Goldenrod" />
+                                <!--<GradientStop Offset="0.508" Color="Gainsboro" />-->
+                                <GradientStop Offset="0.51" Color="DarkGoldenrod" />
+                                <GradientStop Offset="0.52" Color="DarkSlateGray" />
+                                <GradientStop Offset="0.53" Color="DarkViolet" />
+                                <GradientStop Offset="0.54" Color="LawnGreen" />
+                                <GradientStop Offset="0.55" Color="DeepSkyBlue" />
+                                <GradientStop Offset="0.56" Color="Lavender" />
+                                <GradientStop Offset="0.565" Color="DarkOrange" />
+                                <GradientStop Offset="0.57" Color="LightGoldenrodYellow" />
+                                <GradientStop Offset="0.575" Color="CadetBlue" />
+                                <GradientStop Offset="0.58" Color="LemonChiffon" />
+                                <GradientStop Offset="0.6" Color="Chartreuse" />
+                                <GradientStop Offset="0.7" Color="RosyBrown" />
+                                <GradientStop Offset="0.8" Color="Yellow" />
+                                <GradientStop Offset="1" Color="Red" />
+                            </s:HeatmapColorPalette>
+                        </s:FastUniformHeatmapRenderableSeries.ColorMap>
+
+                    </s:FastUniformHeatmapRenderableSeries>
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis 
+                        x:Name="SS_X1"
+                        Style="{StaticResource AxisStyle}" 
+                        DrawLabels="False"  
+                        Visibility="Hidden" 
+                        VisibleRange="0,20000" 
+                        GrowBy="0.1, 0.1" 
+                        FlipCoordinates="False"                    
+                 />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis x:Name="SS_Y1" VisibleRange="0,20000" Style="{StaticResource AxisStyle}" Visibility="Hidden" FlipCoordinates="True" />
+                </s:SciChartSurface.YAxis>
+
+            </s:SciChartSurface>
+            <s:SciChartSurface x:Name="Sensor_Scopex3"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="30,305,335,547">
+                <s:SciChartSurface.RenderableSeries>
+                    <!--<s:FastLineRenderableSeries x:Name="Sensor_Data"
+                                            
+                    Stroke="#FF99EE99"
+                    AntiAliasing="True"
+                    StrokeThickness="2"/>-->
+
+                    <!--<s:FastLineRenderableSeries x:Name="Sensor_compassData" Stroke="Red" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_A_Data" Stroke="Green" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />-->
+
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_compassData">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Red" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_A_Data">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Green" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+                        <s:VerticalSliceModifier x:Name="S3_Line1" ShowAxisLabels="False" ShowTooltipOn="Never">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="S3_Line1i" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip="" MouseMove="S3_Line1i_MouseMove" />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+                        LegendPlacement="Top"
+                        Orientation="Horizontal"
+                        ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+                        x:Name="X_SCope5"
+                        FlipCoordinates="False"
+                        GrowBy="0.1, 0.1"
+                        ScientificNotation="None"
+                        TextFormatting="#.############"
+                        BorderThickness="0,2,0,0" 
+                        TitleFontSize="20"
+                        VisibleRange="0,150" 
+                        AutoRange="Once" MaxAutoTicks="20"    
+                                   />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+                        x:Name="Y_SCope5"
+                        GrowBy="0.1, 0.1" 
+                        TitleFontSize="20"
+                        VisibleRange="-460,460" 
+                        AutoRange="Once" AxisAlignment="Left" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+            <Label Content="COMPASS DATA" HorizontalAlignment="Left" Margin="-48,373,0,0" VerticalAlignment="Top" Width="126" FontWeight="Bold" Foreground="Red" FontSize="14" RenderTransformOrigin="0.5,0.5">
+                <Label.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Label.RenderTransform>
+            </Label>
+            <s:SciChartSurface x:Name="Sensor_Scopex4"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="30,484,335,369">
+                <s:SciChartSurface.RenderableSeries>
+                    <!--<s:FastLineRenderableSeries x:Name="Sensor_Data"
+                                            
+                    Stroke="#FF99EE99"
+                    AntiAliasing="True"
+                    StrokeThickness="2"/>-->
+
+                    <!--<s:FastLineRenderableSeries x:Name="Sensor_B_Data" Stroke="Red" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_C_Data" Stroke="Green" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />-->
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_B_Data">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Blue" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_C_Data">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Green" Stroke="Transparent" StrokeThickness="2"/>
+                    </s:XyScatterRenderableSeries>
+
+                </s:SciChartSurface.RenderableSeries>
+
+
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+                        <s:VerticalSliceModifier x:Name="S4_Line1" ShowAxisLabels="False" ShowTooltipOn="Never">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="S4_Line1i" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip="" MouseMove="S4_Line1i_MouseMove" />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+                        LegendPlacement="Top"
+                        Orientation="Horizontal"
+                        ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+                        x:Name="X_SCope6"
+                        FlipCoordinates="False"
+                        GrowBy="0.1, 0.1"
+                        ScientificNotation="None"
+                        TextFormatting="#.############"
+                        BorderThickness="0,2,0,0" 
+                        TitleFontSize="20"
+                        VisibleRange="0,150" 
+                        AutoRange="Once" MaxAutoTicks="20"    
+                                   />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+                        x:Name="Y_SCope6"
+                        GrowBy="0.1, 0.1" 
+                        TitleFontSize="20"
+                        VisibleRange="0,100" 
+                        AutoRange="Once" AxisAlignment="Left" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+            <Label Content="DATA (A, B, C)" HorizontalAlignment="Left" Margin="-37,545,0,0" VerticalAlignment="Top" Width="103" FontWeight="Bold" Foreground="Red" FontSize="14" RenderTransformOrigin="0.5,0.5">
+                <Label.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Label.RenderTransform>
+            </Label>
+            <TextBox x:Name="RB_tbx" HorizontalAlignment="Left" Height="37" Margin="1216,16,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="84" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red"/>
+            <Label Content="Counter" HorizontalAlignment="Left" Margin="1122,16,0,0" VerticalAlignment="Top" Width="90" FontSize="20" FontWeight="Bold"/>
+            <RadioButton x:Name="Elephant" Content="Robot Voi" HorizontalAlignment="Left" Margin="916,29,0,0" VerticalAlignment="Top" IsChecked="True" Checked="Elephant_Checked"/>
+            <RadioButton x:Name="Rabit" Content="Robot Tho" HorizontalAlignment="Left" Margin="1021,29,0,0" VerticalAlignment="Top" Checked="Rabit_Checked"/>
+            <CheckBox x:Name="SCREEN_VIEWS2" Content="RUN" HorizontalAlignment="Left" Margin="1524,25,0,0" VerticalAlignment="Top" Checked="SCREEN_VIEWS2_Checked" Unchecked="SCREEN_VIEWS2_Unchecked" Width="61" IsChecked="True"/>
+            <TextBox x:Name="RB_tbx_time" HorizontalAlignment="Left" Height="37" Margin="1384,14,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="121" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red"/>
+            <Label Content="Time =" HorizontalAlignment="Left" Margin="1305,14,0,0" VerticalAlignment="Top" Width="79" FontSize="20" FontWeight="Bold"/>
+            <TextBox x:Name="RB_tbx_time_Copy" HorizontalAlignment="Left" Height="36" Margin="1601,742,0,0" TextWrapping="Wrap" Text="INPUT" VerticalAlignment="Top" Width="136" FontSize="20" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RB_tbx_time_Copy1" HorizontalAlignment="Left" Height="36" Margin="1601,783,0,0" TextWrapping="Wrap" Text="INPUT2" VerticalAlignment="Top" Width="136" FontSize="20" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RB_tbx_time_Copy2" HorizontalAlignment="Left" Height="36" Margin="1601,829,0,0" TextWrapping="Wrap" Text="INPUT3" VerticalAlignment="Top" Width="136" FontSize="20" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RB_tbx_time_Copy3" HorizontalAlignment="Left" Height="37" Margin="1602,414,0,0" TextWrapping="Wrap" Text="DATA A" VerticalAlignment="Top" Width="136" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy4" HorizontalAlignment="Left" Height="37" Margin="1602,463,0,0" TextWrapping="Wrap" Text="DATA B" VerticalAlignment="Top" Width="136" FontSize="20" FontWeight="Bold" Foreground="Red"/>
+            <TextBox x:Name="RB_tbx_time_Copy5" HorizontalAlignment="Left" Height="37" Margin="1602,513,0,0" TextWrapping="Wrap" Text="DATA C" VerticalAlignment="Top" Width="136" FontSize="20" FontWeight="Bold" Foreground="#FF098000"/>
+            <TextBox x:Name="RB_tbx_time_Copy6" HorizontalAlignment="Left" Height="37" Margin="1601,113,0,0" TextWrapping="Wrap" Text="GOC QUAY" VerticalAlignment="Top" Width="136" FontSize="20" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RB_tbx_time_Copy7" HorizontalAlignment="Left" Height="37" Margin="1601,63,0,0" TextWrapping="Wrap" Text="ENCODER" VerticalAlignment="Top" Width="136" FontSize="20" FontWeight="Bold" Foreground="Violet"/>
+            <Label Content="D0" HorizontalAlignment="Left" Margin="1609,883,0,0" VerticalAlignment="Top" Width="36" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D1" HorizontalAlignment="Left" Margin="1643,883,0,0" VerticalAlignment="Top" Width="35" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D2" HorizontalAlignment="Left" Margin="1679,883,0,0" VerticalAlignment="Top" Width="35" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D3" HorizontalAlignment="Left" Margin="1716,883,0,0" VerticalAlignment="Top" Width="34" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D4" HorizontalAlignment="Left" Margin="1753,883,0,0" VerticalAlignment="Top" Width="34" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D5" HorizontalAlignment="Left" Margin="1788,883,0,0" VerticalAlignment="Top" Width="35" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D6" HorizontalAlignment="Left" Margin="1824,883,0,0" VerticalAlignment="Top" Width="35" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <Label Content="D7" HorizontalAlignment="Left" Margin="1859,883,0,0" VerticalAlignment="Top" Width="35" FontSize="11" FontWeight="Bold" FontStyle="Italic" Foreground="Blue"/>
+            <s:SciChartSurface x:Name="Sensor_lOGIC"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="31,865,333,14">
+                <s:SciChartSurface.RenderableSeries>
+                    <s:XyScatterRenderableSeries x:Name="Sensor_lOGIC9">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Azure" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+                        <s:VerticalSliceModifier x:Name="S5_Linei" ShowAxisLabels="False" ShowTooltipOn="Never">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="S5_Line1i" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip="" MouseMove="S5_Linei1_MouseMove"  />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+                            LegendPlacement="Top"
+                            Orientation="Horizontal"
+                            ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+                        x:Name="X_SCope7"
+                        FlipCoordinates="False"
+                        GrowBy="0.1, 0.1"
+                        ScientificNotation="None"
+                        TextFormatting="#.############"
+                        BorderThickness="0,2,0,0" 
+                        TitleFontSize="20"
+                        VisibleRange="0,150" 
+                        AutoRange="Once" MaxAutoTicks="20"    
+                                   />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+                        x:Name="Y_SCope7"
+                        GrowBy="0.1, 0.1" 
+                        TitleFontSize="20"
+                        VisibleRange="0,1.2" 
+                        AutoRange="Once" AxisAlignment="Left" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+            <Label Content="ROBOT STEP" HorizontalAlignment="Left" Margin="-48,926,0,0" VerticalAlignment="Top" Width="128" FontWeight="Bold" Foreground="Red" FontSize="14" RenderTransformOrigin="0.5,0.5">
+                <Label.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Label.RenderTransform>
+            </Label>
+            <Label x:Name="Start_View2" Content="LIDAR VIEW" HorizontalAlignment="Left" Margin="490,18,0,0" VerticalAlignment="Top" Width="105" FontSize="16" FontWeight="Bold" Foreground="Black" MouseDoubleClick="Start_View2_MouseDoubleClick" Background="#FFFFFA00" MouseLeftButtonDown="Start_View2_MouseLeftButtonDown"/>
+            <TextBox x:Name="RB_tbx_time_Copy8" HorizontalAlignment="Left" Height="36" Margin="1601,566,0,0" TextWrapping="Wrap" Text="ADC 1" VerticalAlignment="Top" Width="136" FontSize="20" FontWeight="Bold" Foreground="Red"/>
+            <TextBox x:Name="RB_tbx_time_Copy9" HorizontalAlignment="Left" Height="36" Margin="1601,615,0,0" TextWrapping="Wrap" Text="ADC 2" VerticalAlignment="Top" Width="136" FontSize="20" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RB_tbx_time14" HorizontalAlignment="Left" Height="36" Margin="1601,661,0,0" TextWrapping="Wrap" Text="ADC 3" VerticalAlignment="Top" Width="136" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <Label x:Name="Start_sAVE_LOG" Content="SAVE LOG" HorizontalAlignment="Left" Margin="705,18,0,0" VerticalAlignment="Top" Width="90" FontSize="16" FontWeight="Bold" Foreground="Black" Background="Orange" MouseLeftButtonDown="Start_sAVE_LOG_MouseLeftButtonDown"/>
+            <Label x:Name="Start_oPNEN_LOG" Content="OPEN LOG" HorizontalAlignment="Left" Margin="805,18,0,0" VerticalAlignment="Top" Width="95" FontSize="16" FontWeight="Bold" Foreground="Black" Background="ForestGreen" MouseLeftButtonDown="Start_oPNEN_LOG_MouseLeftButtonDown"/>
+            <Label x:Name="Start_View3" Content="MAIN V3" HorizontalAlignment="Left" Margin="600,18,0,0" VerticalAlignment="Top" Width="97" FontSize="16" FontWeight="Bold" Foreground="Black" MouseDoubleClick="Start_View3_MouseDoubleClick" Background="#FFFF00FA" MouseLeftButtonDown="Start_View3_MouseLeftButtonDown"/>
+
+        </Grid>
+
+        <Grid x:Name="Lidar_View2" HorizontalAlignment="Left" Height="1044"  VerticalAlignment="Top" Width="1920"  Background="{DynamicResource {x:Static SystemColors.GradientInactiveCaptionBrushKey}}" Visibility="Hidden" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <!--  The SciChartPolarInteractionToolbar adds zoom, zoom extents and rotate functionality  -->
+            <!--  to the chart and is included for example purposes.  -->
+            <!--  If you wish to know how to zoom and pan a chart then do a search for Zoom Pan in the Examples suite!  -->
+            <ext:SciChartInteractionToolbar TargetSurface="{Binding Source={x:Reference Name=sciChart}}" Margin="0,37,1870,46" Visibility="Visible" >
+
+                <ext:FlyoutMenuButton Content="AXIS"
+                                      Padding="0"
+                                      Style="{StaticResource FlyoutMenuButtonStyle}">
+                    <ext:FlyoutMenuButton.PopupContent>
+                        <StackPanel MinWidth="150" Orientation="Vertical">
+                            <!--  The XAxis Alignment combo  -->
+                            <TextBlock Text="XAxis Alignment" />
+                            <ext:FlyoutSeparator />
+                            <ComboBox x:Name="xAxisAlignment" SelectionChanged="OnXAxisALignmentChanged" />
+
+                            <!--  The YAxis Alignment combo  -->
+                            <TextBlock Margin="4,10,4,4" Text="YAxis Alignment" />
+                            <ext:FlyoutSeparator />
+                            <ComboBox x:Name="yAxisAlignment" SelectionChanged="OnYAxisALignmentChanged" />
+                        </StackPanel>
+                    </ext:FlyoutMenuButton.PopupContent>
+                </ext:FlyoutMenuButton>
+
+                <ext:FlyoutMenuButton Content="FLIP"
+                                      Padding="0"
+                                      Style="{StaticResource FlyoutMenuButtonStyle}">
+                    <ext:FlyoutMenuButton.PopupContent>
+                        <StackPanel MinWidth="150" Orientation="Vertical">
+                            <TextBlock Text="Flip Axis" />
+                            <ext:FlyoutSeparator />
+
+                            <!--  Flip XAxis Coordinates  -->
+                            <CheckBox Margin="4"
+                                      Content="XAxis.FlipCoordinates?"
+                                      Foreground="#999"
+                                      IsChecked="{Binding Source={x:Reference Name=xAxis}, Path=FlipCoordinates, Mode=TwoWay}" />
+
+                            <!--  Flip YAxis Coordinates  -->
+                            <CheckBox Margin="4"
+                                      Content="YAxis.FlipCoordinates?"
+                                      Foreground="#999"
+                                      IsChecked="{Binding Source={x:Reference Name=yAxis}, Path=FlipCoordinates, Mode=TwoWay}" />
+                        </StackPanel>
+                    </ext:FlyoutMenuButton.PopupContent>
+                </ext:FlyoutMenuButton>
+
+                <ext:FlyoutMenuButton Content="DEG"
+                                      Padding="0"
+                                      Style="{StaticResource FlyoutMenuButtonStyle}">
+                    <ext:FlyoutMenuButton.PopupContent>
+                        <StackPanel MinWidth="150" Orientation="Vertical">
+
+                            <TextBlock Text="Axes Angle" />
+
+                            <ext:FlyoutSeparator />
+
+                            <TextBlock Text="XAxis Angle" />
+
+                            <!--  Change XAxis Angle  -->
+                            <Slider Maximum="360"
+                                Minimum="0"
+                                Value="{Binding Source={x:Reference Name=xAxis},
+                                                Path=RotationAngle,
+                                                Mode=TwoWay,
+                                                UpdateSourceTrigger=PropertyChanged}" />
+
+                            <ext:FlyoutSeparator />
+
+                            <TextBlock Text="YAxis Angle" />
+
+                            <!--  Change YAxis Angle  -->
+                            <Slider Maximum="360"
+                                Minimum="0"
+                                Value="{Binding Source={x:Reference Name=yAxis}, 
+                                                Path=Angle,
+                                                Mode=TwoWay,
+                                                UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                    </ext:FlyoutMenuButton.PopupContent>
+                </ext:FlyoutMenuButton>
+
+
+            </ext:SciChartInteractionToolbar>
+
+            <s:SciChartSurface Name="sciChart"
+                           BorderThickness="0"
+                           Padding="0" ShowLicensingWarnings="False" Margin="50,38,844,46" Visibility="Visible">
+
+                <s:SciChartSurface.RenderableSeries>
+                    <s:XyScatterRenderableSeries x:Name="lineRenderSeries"
+                                            Stroke="#C4E5FC"
+                                            StrokeThickness="4">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Red" Stroke="Transparent" StrokeThickness="2"/>
+                        <s:XyScatterRenderableSeries.SeriesAnimation>
+                            <s:SweepAnimation AnimationDelay="0:0:1" Duration="0:0:1"/>
+                        </s:XyScatterRenderableSeries.SeriesAnimation>
+                    </s:XyScatterRenderableSeries>
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.XAxis>
+                    <s:PolarXAxis Name="xAxis"
+                              AxisTitle="Lidar Chart"
+                              BorderBrush="#93A3C5"
+                              RotationAngle="0"
+                              BorderThickness="0,2,0,0"
+                              TitleFontSize="20" MaxAutoTicks="36" MinimalZoomConstrain="5" MinorsPerMajor="3" Height="964" Width="957" />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:PolarYAxis Name="yAxis" MaxAutoTicks="15" AxisTitleOffset="0" VisibleRangeLimitMode="Max" />
+                </s:SciChartSurface.YAxis>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+                        <s:ZoomExtentsModifier />
+                        <s:RubberBandXyZoomModifier IsXAxisOnly="True" />
+                        <s:MouseWheelZoomModifier XyDirection="YDirection" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+            </s:SciChartSurface>
+
+            <s:SciChartSurface x:Name="Sensor_ScopeLD"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="1081,38,10,560">
+                <s:SciChartSurface.RenderableSeries>
+
+                    <s:FastLineRenderableSeries x:Name="Sensor_Data_LD1" Stroke="Red" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Data_LD2" Stroke="Green" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Data_LD3" Stroke="Blue" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Data_LD4" Stroke="Orange" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+                        <s:VerticalSliceModifier x:Name="Sld_Line1">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="Sld_Line1i" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip="" />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+                        LegendPlacement="Top"
+                        Orientation="Horizontal"
+                        ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+                    x:Name="X_SCopeld1"
+                    FlipCoordinates="False"
+                    GrowBy="0.1, 0.1"
+                    ScientificNotation="None"
+                    TextFormatting="#.############"
+                    BorderThickness="0,2,0,0" 
+                    TitleFontSize="20"
+                    VisibleRange="0,100" 
+                    AutoRange="Once"    
+                                   />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+                    x:Name="Y_SCopeld1"
+                    GrowBy="0.1, 0.1" 
+                    TitleFontSize="20"
+                    VisibleRange="-10,10" 
+                    AutoRange="Once" AxisAlignment="Left" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+
+            <ComboBox x:Name="REG_SELLECT1"  HorizontalAlignment="Left" Margin="1208,7,0,0" VerticalAlignment="Top" Width="107" Visibility="Hidden"/>
+            <Label Content="LIDAR RAW DATA SCOPE (192.168.1.11)" HorizontalAlignment="Left" VerticalAlignment="Top" Width="386" FontWeight="Bold" FontSize="20" Foreground="Blue" RenderTransformOrigin="-1.144,0.246" Margin="-2,0,0,0"/>
+            <Label x:Name="switch_mode1" Content="Robot Analyzer" HorizontalAlignment="Left" VerticalAlignment="Top" Width="138" FontWeight="Bold" FontSize="16" RenderTransformOrigin="-1.144,0.246" Margin="938,2,0,0" MouseDoubleClick="switch_mode2_MouseDoubleClick" Background="{DynamicResource ToggleBrush}" Foreground="#FF000200" Height="32" MouseLeftButtonDown="switch_mode2_MouseLeftButtonDown"/>
+            <Ellipse x:Name="Connect1" HorizontalAlignment="Left" Height="24" Margin="387,9,0,0" VerticalAlignment="Top" Width="24" Fill="Red"/>
+            <s:SciChartSurface x:Name="Sensor_ScopeLD_Copy"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="1081,552,10,46">
+                <s:SciChartSurface.RenderableSeries>
+
+                    <s:FastLineRenderableSeries x:Name="Sensor_Data_LD5" Stroke="Red" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Data_LD6" Stroke="Green" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Data_LD7" Stroke="Blue" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+                    <s:FastLineRenderableSeries x:Name="Sensor_Data_LD8" Stroke="Orange" ToolTip="" StrokeThickness="2" s:VerticalSliceModifier.TooltipContainerStyle="{StaticResource TooltipStyle1}" />
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+                        <s:VerticalSliceModifier x:Name="Sld_Line2">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="Sld_Line1i1" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip="" />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+                            LegendPlacement="Top"
+                            Orientation="Horizontal"
+                            ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+                        x:Name="X_SCopeld2"
+                        FlipCoordinates="False"
+                        GrowBy="0.1, 0.1"
+                        ScientificNotation="None"
+                        TextFormatting="#.############"
+                        BorderThickness="0,2,0,0" 
+                        TitleFontSize="20"
+                        VisibleRange="0,100" 
+                        AutoRange="Once"    
+                                   />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+                        x:Name="Y_SCopeld2"
+                        GrowBy="0.1, 0.1" 
+                        TitleFontSize="20"
+                        VisibleRange="-10,10" 
+                        AutoRange="Once" AxisAlignment="Left" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+
+        </Grid>
+        <Grid x:Name="Main_View"  HorizontalAlignment="Left" Width="1920" Background="{DynamicResource {x:Static SystemColors.InactiveBorderBrushKey}}" Margin="0,0,0,35" Grid.ColumnSpan="2">
+            <Label Content="MAIN ROBOT" HorizontalAlignment="Left" Margin="10,9,0,0" VerticalAlignment="Top" Width="170" FontSize="24" FontWeight="Bold" Foreground="Red"/>
+            <s:SciChartSurface x:Name="Sensor_ScopeU1"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="355,56,29,666">
+                <s:SciChartSurface.RenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_U1">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Red" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+                    <s:XyScatterRenderableSeries x:Name="Sensor_U12">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Orange" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+
+
+                        <s:VerticalSliceModifier x:Name="U1_Line1" ShowAxisLabels="False" ShowTooltipOn="Never">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="U1_Line1i" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip=""  />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+             LegendPlacement="Top"
+             Orientation="Horizontal"
+             ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+             x:Name="X_SCopeu"
+             FlipCoordinates="False"
+             GrowBy="0.1, 0.1"
+             ScientificNotation="None"
+             TextFormatting="#.############"
+             BorderThickness="0,2,0,0" 
+             TitleFontSize="20"
+             VisibleRange="0,150" 
+             AutoRange="Once" MaxAutoTicks="20"    
+                        />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+             x:Name="Y_SCopeu"
+             GrowBy="0.1, 0.1" 
+             TitleFontSize="20"
+             VisibleRange="0,66000" 
+             AutoRange="Once" AxisAlignment="Left" MaxAutoTicks="24" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+            <Label x:Name="Start_View_Exit" Content="THOÁT" HorizontalAlignment="Left" Margin="1820,8,0,0" VerticalAlignment="Top" Width="71" FontSize="16" FontWeight="Bold" Foreground="Black" MouseDoubleClick="Start_View_Exit_MouseDoubleClick" Background="#FFFFFA00" MouseLeftButtonDown="Start_View_Exit_MouseLeftButtonDown" Height="36"/>
+            <TextBox x:Name="RB_Show_S1"  HorizontalAlignment="Left" Height="37" Margin="210,57,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RB_Show_S2"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,106,0,0"/>
+            <TextBox x:Name="RB_tbx_time_Copy10" HorizontalAlignment="Left" Height="37" Margin="23,57,0,0" TextWrapping="Wrap" Text="GOIP EXTI" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy11" HorizontalAlignment="Left" Height="37" Margin="23,106,0,0" TextWrapping="Wrap" Text="GPIO[1:8]" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy12" HorizontalAlignment="Left" Height="37" Margin="23,155,0,0" TextWrapping="Wrap" Text="GPIO[9:16]" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy13" HorizontalAlignment="Left" Height="37" Margin="23,253,0,0" TextWrapping="Wrap" Text="GPIO[22:29]" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy14" HorizontalAlignment="Left" Height="37" Margin="23,303,0,0" TextWrapping="Wrap" Text="GPIO[30:37]" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy15" HorizontalAlignment="Left" Height="37" Margin="23,203,0,0" TextWrapping="Wrap" Text="GPIO[17:21]" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_Show_S3"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,156,0,0"/>
+            <TextBox x:Name="RB_Show_S4"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,204,0,0"/>
+            <TextBox x:Name="RB_Show_S5"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,254,0,0"/>
+            <TextBox x:Name="RB_Show_S6"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,303,0,0"/>
+            <TextBox x:Name="RB_Show_S8"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,455,0,0"/>
+            <TextBox x:Name="RB_tbx_time_Copy16" HorizontalAlignment="Left" Height="37" Margin="23,406,0,0" TextWrapping="Wrap" Text=" ADC CH1" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy17" HorizontalAlignment="Left" Height="37" Margin="23,455,0,0" TextWrapping="Wrap" Text="ADC CH2" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy18" HorizontalAlignment="Left" Height="36" Margin="23,506,0,0" TextWrapping="Wrap" Text="ADC CH3" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy19" HorizontalAlignment="Left" Height="37" Margin="23,602,0,0" TextWrapping="Wrap" Text="ADC CH5" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy20" HorizontalAlignment="Left" Height="37" Margin="23,652,0,0" TextWrapping="Wrap" Text="ADC CH6" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy21" HorizontalAlignment="Left" Height="37" Margin="23,552,0,0" TextWrapping="Wrap" Text="ADC CH4" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_Show_S9"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,506,0,0"/>
+            <TextBox x:Name="RB_Show_S11"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,603,0,0"/>
+            <TextBox x:Name="RB_Show_S12"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,652,0,0"/>
+            <TextBox x:Name="RB_Show_S7"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,407,0,0"/>
+            <TextBox x:Name="RB_Show_S10"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,552,0,0"/>
+            <TextBox x:Name="RB_tbx_time_Copy22" HorizontalAlignment="Left" Height="37" Margin="23,703,0,0" TextWrapping="Wrap" Text="ADC CH7" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy23" HorizontalAlignment="Left" Height="37" Margin="23,753,0,0" TextWrapping="Wrap" Text="X value" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_Show_S13"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,704,0,0"/>
+            <TextBox x:Name="RB_Show_S14"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,753,0,0"/>
+            <TextBox x:Name="RB_tbx_time_Copy24" HorizontalAlignment="Left" Height="37" Margin="23,807,0,0" TextWrapping="Wrap" Text="Y value" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_tbx_time_Copy25" HorizontalAlignment="Left" Height="37" Margin="23,857,0,0" TextWrapping="Wrap" Text="Z value" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <TextBox x:Name="RB_Show_S15"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,808,0,0"/>
+            <TextBox x:Name="RB_Show_S16"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,857,0,0"/>
+            <TextBox x:Name="RB_Show_PE1"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="63" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red" Margin="1348,958,0,0"/>
+            <TextBox x:Name="RB_Show_PE2"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="63" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red" Margin="1416,958,0,0"/>
+            <TextBox x:Name="RB_Show_PE3"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="63" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red" Margin="1484,958,0,0"/>
+            <TextBox x:Name="RB_Show_PE4"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="63" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red" Margin="1552,958,0,0"/>
+            <TextBox x:Name="RB_Show_PE5"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="63" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red" Margin="1620,958,0,0"/>
+            <TextBox x:Name="RB_Show_PE6"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="63" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red" Margin="1688,958,0,0" RenderTransformOrigin="1.111,0.515"/>
+            <TextBox x:Name="RB_Show_PE7"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="63" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red" Margin="1756,958,0,0" RenderTransformOrigin="1.111,0.515"/>
+            <TextBox x:Name="RB_Show_PE8"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="63" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Red" Margin="1824,958,0,0" RenderTransformOrigin="1.111,0.515"/>
+            <TextBox x:Name="RB_Show_S17"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Maroon" Margin="212,909,0,0"/>
+            <Label Content="PES Data" HorizontalAlignment="Left" Margin="1213,955,0,0" VerticalAlignment="Top" Width="120" FontSize="24" FontWeight="Bold" Foreground="Red"/>
+            <Label Content="EXTI1 CNT" HorizontalAlignment="Left" Margin="23,906,0,0" VerticalAlignment="Top" Width="172" FontSize="24" FontWeight="Bold" Foreground="#FF0022FF"/>
+            <Label Content="EXTI2 CNT" HorizontalAlignment="Left" Margin="23,955,0,0" VerticalAlignment="Top" Width="172" FontSize="24" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RB_Show_S18"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Maroon" Margin="212,958,0,0"/>
+            <TextBox x:Name="RB_Show_S19"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Maroon" Margin="505,909,0,0" Visibility="Hidden"/>
+            <Label Content="EXTI3 CNT" HorizontalAlignment="Left" Margin="361,906,0,0" VerticalAlignment="Top" Width="139" FontSize="24" FontWeight="Bold" Foreground="#FF0022FF" Visibility="Hidden"/>
+            <Label Content="X offset" HorizontalAlignment="Left" Margin="361,955,0,0" VerticalAlignment="Top" Width="139" FontSize="24" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RB_Show_S20"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Maroon" Margin="505,958,0,0"/>
+            <TextBox x:Name="RB_Show_S21"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Maroon" Margin="785,912,0,0" Visibility="Hidden"/>
+            <Label Content="EXTI5 CNT" HorizontalAlignment="Left" Margin="648,906,0,0" VerticalAlignment="Top" Width="132" FontSize="24" FontWeight="Bold" Foreground="#FF0022FF" Visibility="Hidden"/>
+            <Label Content="Y offset" HorizontalAlignment="Left" Margin="648,955,0,0" VerticalAlignment="Top" Width="132" FontSize="24" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RB_Show_S22"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Maroon" Margin="785,961,0,0"/>
+            <TextBox x:Name="RB_Show_S23"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Maroon" Margin="1060,912,0,0" Visibility="Hidden"/>
+            <Label Content="EXTI7 CNT" HorizontalAlignment="Left" Margin="916,909,0,0" VerticalAlignment="Top" Width="139" FontSize="24" FontWeight="Bold" Foreground="#FF0022FF" Visibility="Hidden"/>
+            <Label Content="Z offset" HorizontalAlignment="Left" Margin="916,958,0,0" VerticalAlignment="Top" Width="139" FontSize="24" FontWeight="Bold" Foreground="Blue"/>
+            <TextBox x:Name="RB_Show_S24"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Maroon" Margin="1060,961,0,0"/>
+            <Ellipse x:Name="usb_Status" HorizontalAlignment="Left" Height="35" Margin="343,11,0,0" VerticalAlignment="Top" Width="35" Fill="Red"/>
+            <Label x:Name="label_usb"  Content="Mất kết nối USB" HorizontalAlignment="Left" Margin="185,13,0,0" VerticalAlignment="Top" Width="153" FontSize="16" FontWeight="Bold" Foreground="Red"/>
+            <TextBox x:Name="RB_Show_S61"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="210,354,0,0"/>
+            <TextBox x:Name="RB_tbx_time_Copy26" HorizontalAlignment="Left" Height="37" Margin="23,354,0,0" TextWrapping="Wrap" Text="GPIO[38:45]" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+            <s:SciChartSurface x:Name="Sensor_ScopeU2"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="355,417,29,306">
+                <s:SciChartSurface.RenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_U2">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Red" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+                    <s:XyScatterRenderableSeries x:Name="Sensor_U22">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Orange" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+
+
+                        <s:VerticalSliceModifier x:Name="U1_Line2" ShowAxisLabels="False" ShowTooltipOn="Never">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="U1_Line1i1" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip="" />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+                            LegendPlacement="Top"
+                            Orientation="Horizontal"
+                            ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+                        x:Name="X_SCopeu1"
+                        FlipCoordinates="False"
+                        GrowBy="0.1, 0.1"
+                        ScientificNotation="None"
+                        TextFormatting="#.############"
+                        BorderThickness="0,2,0,0" 
+                        TitleFontSize="20"
+                        VisibleRange="0,150" 
+                        AutoRange="Once" MaxAutoTicks="20"    
+                        />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+                        x:Name="Y_SCopeu1"
+                        GrowBy="0.1, 0.1" 
+                        TitleFontSize="20"
+                        VisibleRange="32000,33000" 
+                        AutoRange="Once" AxisAlignment="Left" MaxAutoTicks="24" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+            <ComboBox x:Name="comboBox_u1" HorizontalAlignment="Left" Margin="498,10,0,0" VerticalAlignment="Top" Width="150" Height="36" SelectionChanged="comboBox_u1_SelectionChanged"/>
+            <Label x:Name="label_usb_Copy"  Content="Đồ thị 1: " HorizontalAlignment="Left" Margin="403,14,0,0" VerticalAlignment="Top" Width="95" FontSize="16" FontWeight="Bold" Foreground="Red"/>
+            <ComboBox x:Name="comboBox_u2" HorizontalAlignment="Left" Margin="448,370,0,0" VerticalAlignment="Top" Width="175" Height="36" SelectionChanged="comboBox_u2_SelectionChanged"/>
+            <Label x:Name="label_usb_Copy1"  Content="Đồ thị 2: " HorizontalAlignment="Left" Margin="358,372,0,0" VerticalAlignment="Top" Width="90" FontSize="16" FontWeight="Bold" Foreground="Red"/>
+            <Label x:Name="Start_View_cLEAR" Content="XÓA ĐỒ THỊ" HorizontalAlignment="Left" Margin="1640,8,0,0" VerticalAlignment="Top" Width="125" FontSize="16" FontWeight="Bold" Foreground="Black" MouseDoubleClick="Start_View_cLEAR_MouseDoubleClick" Background="#FF19FF00" MouseLeftButtonDown="Start_View_cLEAR_MouseLeftButtonDown" Height="36"/>
+            <TextBox x:Name="RB_Show_counter"  HorizontalAlignment="Left" Height="36" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Maroon" Margin="1483,8,0,0"/>
+            <Label Content="Counter" HorizontalAlignment="Left" Margin="1359,5,0,0" VerticalAlignment="Top" Width="120" FontSize="24" FontWeight="Bold" Foreground="#FF0022FF"/>
+            <ComboBox x:Name="comboBox_u11" HorizontalAlignment="Left" Margin="698,10,0,0" VerticalAlignment="Top" Width="162" Height="36" SelectionChanged="comboBox_u11_SelectionChanged"/>
+            <Label x:Name="label_usb_Copy2"  Content="và " HorizontalAlignment="Left" Margin="653,14,0,0" VerticalAlignment="Top" Width="40" FontSize="16" FontWeight="Bold" Foreground="Red"/>
+            <ComboBox x:Name="comboBox_u22" HorizontalAlignment="Left" Margin="686,370,0,0" VerticalAlignment="Top" Width="174" Height="36" SelectionChanged="comboBox_u22_SelectionChanged"/>
+            <Label x:Name="label_usb_Copy3"  Content="và " HorizontalAlignment="Left" Margin="633,372,0,0" VerticalAlignment="Top" Width="40" FontSize="16" FontWeight="Bold" Foreground="Red"/>
+            <s:SciChartSurface x:Name="Sensor_ScopeU3"  ClipUnderlayAnnotations="False" RenderTransformOrigin="0.5,0.5" Margin="355,753,26,75">
+                <s:SciChartSurface.RenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_U3">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Red" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+                    <s:XyScatterRenderableSeries x:Name="Sensor_U4">
+                        <s:EllipsePointMarker Width="3" Height="3" Fill="Orange" Stroke="Transparent" StrokeThickness="3"/>
+                    </s:XyScatterRenderableSeries>
+
+                </s:SciChartSurface.RenderableSeries>
+
+                <s:SciChartSurface.ChartModifier>
+                    <s:ModifierGroup>
+
+
+
+                        <s:VerticalSliceModifier x:Name="U1_Line3" ShowAxisLabels="False" ShowTooltipOn="Never">
+                            <s:VerticalSliceModifier.VerticalLines>
+                                <s:VerticalLineAnnotation x:Name="U1_Line1i2" Style="{StaticResource sliceStyle5}" X1="30"  LabelPlacement="TopLeft"  ShowLabel="True" ToolTip="" />
+                            </s:VerticalSliceModifier.VerticalLines>
+                        </s:VerticalSliceModifier>
+
+                        <s:LegendModifier Margin="0,0,0,5"
+                            LegendPlacement="Top"
+                            Orientation="Horizontal"
+                            ShowLegend="False" />
+                    </s:ModifierGroup>
+                </s:SciChartSurface.ChartModifier>
+
+                <s:SciChartSurface.XAxis>
+                    <s:NumericAxis DrawMajorBands="True"
+                        x:Name="X_SCopeu2"
+                        FlipCoordinates="False"
+                        GrowBy="0.1, 0.1"
+                        ScientificNotation="None"
+                        TextFormatting="#.############"
+                        BorderThickness="0,2,0,0" 
+                        TitleFontSize="20"
+                        VisibleRange="0,150" 
+                        AutoRange="Once" MaxAutoTicks="20"    
+                        />
+                </s:SciChartSurface.XAxis>
+
+                <s:SciChartSurface.YAxis>
+                    <s:NumericAxis DrawMajorBands="True" 
+                        x:Name="Y_SCopeu2"
+                        GrowBy="0.1, 0.1" 
+                        TitleFontSize="20"
+                        VisibleRange="-14000,14000" 
+                        AutoRange="Once" AxisAlignment="Left" MaxAutoTicks="24" />
+                </s:SciChartSurface.YAxis>
+            </s:SciChartSurface>
+            <Label x:Name="label_usb_Copy4"  Content="Đồ thị dữ liệu góc la bàn số" HorizontalAlignment="Left" Margin="355,719,0,0" VerticalAlignment="Top" Width="225" FontSize="16" FontWeight="Bold" Foreground="Red"/>
+            <TextBox x:Name="RB_Show_compass3"  HorizontalAlignment="Left" Height="26" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="91" FontSize="14" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="1800,721,0,0"/>
+            <ComboBox x:Name="comboBox_Scale2" HorizontalAlignment="Left" Margin="1050,370,0,0" VerticalAlignment="Top" Width="165" Height="36" SelectionChanged="comboBox_Scale2_SelectionChanged" />
+            <ComboBox x:Name="comboBox_Scale1" HorizontalAlignment="Left" Margin="912,9,0,0" VerticalAlignment="Top" Width="165" Height="36" SelectionChanged="comboBox_Scale1_SelectionChanged" />
+            <ComboBox x:Name="comboBox_Scale3" HorizontalAlignment="Left" Margin="725,721,0,0" VerticalAlignment="Top" Width="165" Height="26" FontSize="10" SelectionChanged="comboBox_Scale3_SelectionChanged" />
+            <Label x:Name="label_usb_Copy5"  Content="Scale 3" HorizontalAlignment="Left" Margin="625,719,0,0" VerticalAlignment="Top" Width="80" FontSize="16" FontWeight="Bold" Foreground="Red"/>
+            <Label x:Name="label_usb_Copy6"  Content="Z angle" HorizontalAlignment="Left" Margin="1715,718,0,0" VerticalAlignment="Top" Width="80" FontSize="16" FontWeight="Bold" Foreground="Red"/>
+            <TextBox x:Name="RB_Show_compass2"  HorizontalAlignment="Left" Height="26" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="92" FontSize="14" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="1588,722,0,0"/>
+            <Label x:Name="label_usb_Copy7"  Content="Y Angle" HorizontalAlignment="Left" Margin="1504,719,0,0" VerticalAlignment="Top" Width="80" FontSize="16" FontWeight="Bold" Foreground="Red"/>
+            <TextBox x:Name="RB_Show_compass1"  HorizontalAlignment="Left" Height="26" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="92" FontSize="14" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="1390,722,0,0"/>
+            <Label x:Name="label_usb_Copy8"  Content="X Angle" HorizontalAlignment="Left" Margin="1305,718,0,0" VerticalAlignment="Top" Width="80" FontSize="16" FontWeight="Bold" Foreground="Red"/>
+            <TextBox x:Name="RB_Show_compass4"  HorizontalAlignment="Left" Height="26" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="92" FontSize="14" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" Margin="1178,722,0,0"/>
+            <Label x:Name="label_usb_Copy9"  Content="KZ Angle" HorizontalAlignment="Left" Margin="1092,718,0,0" VerticalAlignment="Top" Width="80" FontSize="16" FontWeight="Bold" Foreground="Red"/>
+            <Grid x:Name="Setup_eeprom"  HorizontalAlignment="Left" Width="1536" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" Margin="355,370,0,0">
+                <TextBox x:Name="RB_SV1"  HorizontalAlignment="Left" Height="37" Margin="214,64,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy27" HorizontalAlignment="Left" Height="37" Margin="27,64,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 1" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV2"  HorizontalAlignment="Left" Height="37" Margin="214,121,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy28" HorizontalAlignment="Left" Height="37" Margin="27,121,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 2" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV3"  HorizontalAlignment="Left" Height="37" Margin="214,176,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy29" HorizontalAlignment="Left" Height="37" Margin="27,176,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 3" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV4"  HorizontalAlignment="Left" Height="37" Margin="214,233,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy30" HorizontalAlignment="Left" Height="37" Margin="27,233,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 4" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV5"  HorizontalAlignment="Left" Height="37" Margin="214,295,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy31" HorizontalAlignment="Left" Height="37" Margin="27,295,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 5" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV6"  HorizontalAlignment="Left" Height="37" Margin="214,351,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy32" HorizontalAlignment="Left" Height="37" Margin="27,351,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 6" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV7"  HorizontalAlignment="Left" Height="37" Margin="214,412,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy33" HorizontalAlignment="Left" Height="37" Margin="27,412,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 7" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV8"  HorizontalAlignment="Left" Height="37" Margin="214,468,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy34" HorizontalAlignment="Left" Height="37" Margin="27,468,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 8" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV9"  HorizontalAlignment="Left" Height="37" Margin="214,527,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy35" HorizontalAlignment="Left" Height="37" Margin="27,527,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 9" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV10"  HorizontalAlignment="Left" Height="37" Margin="214,583,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy36" HorizontalAlignment="Left" Height="37" Margin="27,583,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 10" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <Label Content="DỮ LIỆU LƯU VÀO AT24C04" HorizontalAlignment="Left" Margin="29,10,0,0" VerticalAlignment="Top" Width="469" FontSize="24" FontWeight="Bold" Foreground="Red"/>
+                <TextBox x:Name="RB_SV11"  HorizontalAlignment="Left" Height="37" Margin="814,64,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy37" HorizontalAlignment="Left" Height="37" Margin="627,64,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 11" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV12"  HorizontalAlignment="Left" Height="37" Margin="814,121,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy38" HorizontalAlignment="Left" Height="37" Margin="627,121,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 12" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV13"  HorizontalAlignment="Left" Height="37" Margin="814,176,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy39" HorizontalAlignment="Left" Height="37" Margin="627,176,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 13" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV14"  HorizontalAlignment="Left" Height="37" Margin="814,233,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy40" HorizontalAlignment="Left" Height="37" Margin="627,233,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 14" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV15"  HorizontalAlignment="Left" Height="37" Margin="814,295,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy41" HorizontalAlignment="Left" Height="37" Margin="627,295,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 15" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV16"  HorizontalAlignment="Left" Height="37" Margin="814,351,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy42" HorizontalAlignment="Left" Height="37" Margin="627,351,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 16" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV17"  HorizontalAlignment="Left" Height="37" Margin="814,412,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy43" HorizontalAlignment="Left" Height="37" Margin="627,412,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 17" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV18"  HorizontalAlignment="Left" Height="37" Margin="814,468,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy44" HorizontalAlignment="Left" Height="37" Margin="627,468,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 18" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV19"  HorizontalAlignment="Left" Height="37" Margin="814,527,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy45" HorizontalAlignment="Left" Height="37" Margin="627,527,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 19" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SV20"  HorizontalAlignment="Left" Height="37" Margin="814,583,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue"/>
+                <TextBox x:Name="RB_tbx_time_Copy46" HorizontalAlignment="Left" Height="37" Margin="627,583,0,0" TextWrapping="Wrap" Text="DỮ LIỆU 20" VerticalAlignment="Top" Width="172" FontSize="20" FontWeight="Bold" Foreground="Green"/>
+                <TextBox x:Name="RB_SVF11"  HorizontalAlignment="Left" Height="37" Margin="965,64,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF12"  HorizontalAlignment="Left" Height="37" Margin="965,121,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF13"  HorizontalAlignment="Left" Height="37" Margin="965,176,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF14"  HorizontalAlignment="Left" Height="37" Margin="965,233,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF15"  HorizontalAlignment="Left" Height="37" Margin="965,295,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF16"  HorizontalAlignment="Left" Height="37" Margin="965,351,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF17"  HorizontalAlignment="Left" Height="37" Margin="965,412,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF18"  HorizontalAlignment="Left" Height="37" Margin="965,468,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF19"  HorizontalAlignment="Left" Height="37" Margin="965,527,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF20"  HorizontalAlignment="Left" Height="37" Margin="965,583,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF1"  HorizontalAlignment="Left" Height="37" Margin="372,64,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF2"  HorizontalAlignment="Left" Height="37" Margin="372,121,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF3"  HorizontalAlignment="Left" Height="37" Margin="372,176,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF4"  HorizontalAlignment="Left" Height="37" Margin="372,233,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF5"  HorizontalAlignment="Left" Height="37" Margin="372,295,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF6"  HorizontalAlignment="Left" Height="37" Margin="372,351,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF7"  HorizontalAlignment="Left" Height="37" Margin="372,412,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF8"  HorizontalAlignment="Left" Height="37" Margin="372,468,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF9"  HorizontalAlignment="Left" Height="37" Margin="372,527,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SVF10"  HorizontalAlignment="Left" Height="37" Margin="372,583,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="126" FontSize="20" TextAlignment="Center" FontWeight="Bold" Foreground="Blue" IsEnabled="False"/>
+                <TextBox x:Name="RB_SV20_LOG"  HorizontalAlignment="Left" Height="556" Margin="1120,64,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="406" FontSize="16" FontWeight="Normal"/>
+                <Label x:Name="bt_eeprom_Exit" Content="THOÁT" HorizontalAlignment="Left" Margin="1445,10,0,0" VerticalAlignment="Top" Width="81" FontSize="16" FontWeight="Bold" Foreground="Black" MouseDoubleClick="bt_eeprom_Exit_MouseDoubleClick" Background="#FFFFFA00" MouseLeftButtonDown="bt_eeprom_Exit_MouseLeftButtonDown" Height="42"/>
+                <Label x:Name="bt_eeprom_save" Content="LƯU DỮ LIỆU VÀO EPPROM" HorizontalAlignment="Left" Margin="627,10,0,0" VerticalAlignment="Top" Width="223" FontSize="16" FontWeight="Bold" Foreground="Black" MouseDoubleClick="bt_eeprom_save_MouseDoubleClick" Background="#FFFFB400" MouseLeftButtonDown="bt_eeprom_save_MouseLeftButtonDown" Height="42"/>
+                <Label x:Name="bt_eeprom_copy" Content="COPY DỮ LIỆU TỪ EPPROM" HorizontalAlignment="Left" Margin="877,10,0,0" VerticalAlignment="Top" Width="214" FontSize="16" FontWeight="Bold" Foreground="Black" MouseDoubleClick="bt_eeprom_copy_MouseDoubleClick" Background="#FF6BFF00" MouseLeftButtonDown="bt_eeprom_copy_MouseLeftButtonDown" Height="42"/>
+                <Label x:Name="bt_eeprom_savefile" Content="LƯU FILE" HorizontalAlignment="Left" Margin="1120,10,0,0" VerticalAlignment="Top" Width="105" FontSize="16" FontWeight="Bold" Foreground="Black" MouseDoubleClick="Start_View_Exit_MouseDoubleClick" Background="#FF00DCFF" MouseLeftButtonDown="Start_View_Exit_MouseLeftButtonDown" Height="42"/>
+                <Label x:Name="bt_eeprom_readfile" Content="ĐỌC FILE" HorizontalAlignment="Left" Margin="1245,10,0,0" VerticalAlignment="Top" Width="105" FontSize="16" FontWeight="Bold" Foreground="Black" MouseDoubleClick="bt_eeprom_readfile_MouseDoubleClick" Background="#FFFF0029" MouseLeftButtonDown="bt_eeprom_readfile_MouseLeftButtonDown" Height="42"/>
+            </Grid>
+            <Label x:Name="Start_View_EEPROM" Content="CÀI ĐẶT EEPROM" HorizontalAlignment="Left" Margin="1145,8,0,0" VerticalAlignment="Top" Width="155" FontSize="16" FontWeight="Bold" Foreground="Black" MouseDoubleClick="Start_View_EEPROM_MouseDoubleClick" Background="Gold" MouseLeftButtonDown="Start_View_EEPROM_MouseLeftButtonDown" Height="36"/>
+
+        </Grid>
+    </Grid>
+</Window>
